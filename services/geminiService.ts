@@ -2,8 +2,19 @@
 import { GoogleGenAI, Type, GenerateContentResponse, Chat, Modality } from "@google/genai";
 import { Grant, GrantSummary, VideoScene, PlantingAnalysis, RiskItem, VideoScript, PublishingStrategy, VideoTool } from "../types";
 
-// Always use new GoogleGenAI({apiKey: process.env.API_KEY});
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+// Lazy initialization for GoogleGenAI
+let aiClient: GoogleGenAI | null = null;
+
+const getAi = (): GoogleGenAI => {
+    if (!aiClient) {
+        const apiKey = process.env.API_KEY || import.meta.env?.VITE_GEMINI_API_KEY;
+        if (!apiKey) {
+            console.warn("API_KEY environment variable is missing.");
+        }
+        aiClient = new GoogleGenAI({ apiKey: apiKey as string || "dummy_key" });
+    }
+    return aiClient;
+};
 
 export interface GrantResult {
     text: string;
@@ -43,7 +54,7 @@ You MUST integrate the following three core knowledge modules into your response
 *   **Be Proactive:** If a user asks a simple question, try to connect it back to one of the core modules to educate them further. For example, if they ask "How do I participate?", you can explain the process and then add, "...and by participating, you're not just recycling, you're earning a stake in the project through our community share model."
 `;
 
-    const chat: Chat = ai.chats.create({
+    const chat: Chat = getAi().chats.create({
         model: 'gemini-2.5-flash',
         config: {
             systemInstruction,
@@ -64,7 +75,7 @@ export const generateReport = async (topic: string, description: string, reportT
     `;
 
     // Use ai.models.generateContent
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
     });
@@ -85,7 +96,7 @@ export const findGrants = async (keywords: string): Promise<Grant[]> => {
     `;
     
     // Use ai.models.generateContent with responseSchema for JSON output
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
@@ -125,7 +136,7 @@ export const findReforestationGrants = async (projectDescription: string): Promi
         - link: A direct URL to the grant page.
     `;
     
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
@@ -164,7 +175,7 @@ export const analyzePlantingLocation = async (location: string): Promise<Plantin
         5.  A short, compelling crowdfunding pitch to raise funds for this specific location.
     `;
     
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-pro', // Using a more powerful model for complex analysis
         contents: prompt,
         config: {
@@ -232,7 +243,7 @@ export const analyzeGrant = async (grant: Grant, userProfile: string): Promise<G
         - relevancePercentage: A score from 0 to 100 indicating how relevant this grant is to my profile.
     `;
     
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
@@ -277,7 +288,7 @@ export const generateVideoScript = async (prompt: string, image: string | null, 
         userPrompt += "\nAn image has been provided as inspiration.";
     }
 
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: userPrompt,
         config: {
@@ -316,7 +327,7 @@ export const generateBlogPostWithImages = async (title: string, content: string,
         Return a JSON object with two keys: "blogContent" (the full markdown text) and "imagePrompts" (an array of three string prompts).
     `;
 
-    const blogResponse = await ai.models.generateContent({
+    const blogResponse = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: blogGenerationPrompt,
         config: {
@@ -349,7 +360,7 @@ export const generateBlogPostWithImages = async (title: string, content: string,
     const promptsToGenerate = imagePrompts.slice(0, 3);
     
     const imagePromises = promptsToGenerate.map(prompt => 
-        ai.models.generateContent({
+        getAi().models.generateContent({
             model: 'gemini-2.5-flash-image',
             contents: {
                 parts: [{ text: prompt }],
@@ -387,7 +398,7 @@ export const generateBlogPostWithImages = async (title: string, content: string,
 export const generateImageForPost = async (title: string): Promise<string> => {
     const prompt = `A high-quality, professional photo representing the theme of a blog post titled: "${title}". The image should be suitable for a scientific and humanitarian organization's website. Photorealistic, clean, and impactful, 16:9 aspect ratio.`;
     
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
             parts: [{ text: prompt }],
@@ -414,7 +425,7 @@ export const generateImageForPost = async (title: string): Promise<string> => {
 export const generateImageForProject = async (title: string): Promise<string> => {
     const prompt = `A professional, high-quality, photorealistic image representing a humanitarian or scientific project titled: "${title}". The style should be suitable for a research and consultancy firm's portfolio. The image should be impactful and visually compelling, conveying innovation and global reach. Avoid text or logos. Aspect ratio 16:9.`;
     
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
             parts: [{ text: prompt }],
@@ -443,7 +454,7 @@ export const askGoogleBabaAboutImage = async (image: {data: string, mimeType: st
     const textPart = { text: `Analyze this image. The user is particularly interested in: "${userFocus || 'General information, context, and potential opportunities related to the image.'}". Use Google Search to find relevant, up-to-date information, including potential grant opportunities, research collaborations, or relevant news. Provide web sources.` };
     const imagePart = { inlineData: image };
 
-    const response: GenerateContentResponse = await ai.models.generateContent({
+    const response: GenerateContentResponse = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: { parts: [imagePart, textPart] },
         config: {
@@ -461,7 +472,7 @@ export const askGoogleBabaAboutImage = async (image: {data: string, mimeType: st
 };
 
 export const generateSceneVideo = async (description: string): Promise<string[]> => {
-    let operation = await ai.models.generateVideos({
+    let operation = await getAi().models.generateVideos({
       model: 'veo-3.1-lite-generate-preview',
       prompt: description,
       config: {
@@ -481,7 +492,7 @@ export const generateSceneVideo = async (description: string): Promise<string[]>
         polls++;
         
         const op: any = { name: operation.name };
-        updated = await ai.operations.getVideosOperation({ operation: op });
+        updated = await getAi().operations.getVideosOperation({ operation: op });
         done = !!updated?.done;
     }
     
@@ -507,7 +518,7 @@ export const generateSceneVideo = async (description: string): Promise<string[]>
 };
 
 export const generateSceneImage = async (description: string): Promise<string> => {
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
             parts: [{ text: description }],
@@ -532,7 +543,7 @@ export const generateSceneImage = async (description: string): Promise<string> =
 };
 
 export const generateMusicDescription = async (prompt: string): Promise<string> => {
-     const response = await ai.models.generateContent({
+     const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: `Describe a suitable background music track for a video with the following theme: "${prompt}". Describe the mood, instruments, and tempo.`,
     });
@@ -551,7 +562,7 @@ export const generateVideoConcept = async (topic: string, platform: string, lang
     - caption: post caption
     - hashtags: array of strings`;
 
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
@@ -593,7 +604,7 @@ export const getPublishingStrategy = async (topic: string, platform: string, lan
     - algorithmTip: A tip to boost reach
     - nextPostIdea: A follow-up post idea`;
 
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
@@ -622,7 +633,7 @@ export const findBestVideoTools = async (language: string): Promise<VideoTool[]>
     - features: Short description of key features
     - qualityRating: "High"/"Medium"`;
 
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {

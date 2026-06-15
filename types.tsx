@@ -40,11 +40,11 @@ const translations: Record<string, any> = {
         ],
         portfolioTitle: "Featured Research Projects",
         portfolioItems: [
-            { img: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80", title: "Health Systems Research", link: "#", description: "Conducted studies on the evolution, challenges, and future directions of healthcare systems, proposing policies to improve workforce capacity, financing, and infrastructure for equitable access.", tags: ["Health Policy", "Infrastructure", "Equity"]},
-            { img: "https://images.unsplash.com/photo-1584483766114-2cea6facdf57?w=800&q=80", title: "COVID-19 Strategies", link: "#", description: "Analysed data and preventive measures from 44 countries to evaluate their effectiveness in reducing mortality rates.", tags: ["Epidemiology", "Data Analysis", "Global Health"]},
-            { img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80", title: "Climate Change and Diseases", link: "#", description: "Researched the effects of climate change on disease patterns in vulnerable regions.", tags: ["Climate Change", "Environmental Health", "Research"]},
-            { img: "https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=800&q=80", title: "Sexual & Reproductive Health", link: "#", description: "Investigated barriers to maternal healthcare, family planning, and protection from gender-based violence in temporary shelter settings for displaced populations.", tags: ["Women's Health", "Displacement", "Human Rights"]},
-            { img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80", title: "Digital Governance & Sustainability", link: "#", description: "Exploring advancement of transparent governance frameworks and sustainable decision-making in health, environment, and policy through technology-driven solutions.", tags: ["Digital Health", "Governance", "Tech"]}
+            { img: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80", title: "Health Systems Research", link: "/projects#health-systems", description: "Conducted studies on the evolution, challenges, and future directions of healthcare systems, proposing policies to improve workforce capacity, financing, and infrastructure for equitable access.", tags: ["Health Policy", "Infrastructure", "Equity"]},
+            { img: "https://images.unsplash.com/photo-1584483766114-2cea6facdf57?w=800&q=80", title: "COVID-19 Strategies", link: "/projects#covid19", description: "Analysed data and preventive measures from 44 countries to evaluate their effectiveness in reducing mortality rates.", tags: ["Epidemiology", "Data Analysis", "Global Health"]},
+            { img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80", title: "Climate Change and Diseases", link: "/projects#climate-change", description: "Researched the effects of climate change on disease patterns in vulnerable regions.", tags: ["Climate Change", "Environmental Health", "Research"]},
+            { img: "https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=800&q=80", title: "Sexual & Reproductive Health", link: "/projects#srh", description: "Investigated barriers to maternal healthcare, family planning, and protection from gender-based violence in temporary shelter settings for displaced populations.", tags: ["Women's Health", "Displacement", "Human Rights"]},
+            { img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80", title: "Digital Governance & Sustainability", link: "/projects#digital-health", description: "Exploring advancement of transparent governance frameworks and sustainable decision-making in health, environment, and policy through technology-driven solutions.", tags: ["Digital Health", "Governance", "Tech"]}
         ],
         achievementsTitle: "Our Impact",
         achievements: [
@@ -65,10 +65,10 @@ const translations: Record<string, any> = {
         ],
         calendarTitle: "Latest Insights from the Field",
         latestPosts: [
-            { img: "https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800&q=80", title: "The Role of AI in Predicting Outbreak Hotspots", date: "July 15, 2024", comments: 8, link: "#" },
-            { img: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=800&q=80", title: "Challenges in Last-Mile Medical Supply Chains", date: "June 28, 2024", comments: 12, link: "#" },
-            { img: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80", title: "Ethical Considerations in Humanitarian Tech", date: "June 05, 2024", comments: 5, link: "#" },
-            { img: "https://images.unsplash.com/photo-1502740479091-635887520276?w=800&q=80", title: "Case Study: A Mobile Health Clinic's Impact", date: "May 21, 2024", comments: 15, link: "#" },
+            { img: "https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800&q=80", title: "The Role of AI in Predicting Outbreak Hotspots", date: "July 15, 2024", comments: 8, link: "/blog/ai-outbreak-hotspots" },
+            { img: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=800&q=80", title: "Challenges in Last-Mile Medical Supply Chains", date: "June 28, 2024", comments: 12, link: "/blog/last-mile-supply-chains" },
+            { img: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80", title: "Ethical Considerations in Humanitarian Tech", date: "June 05, 2024", comments: 5, link: "/blog/ethical-considerations" },
+            { img: "https://images.unsplash.com/photo-1502740479091-635887520276?w=800&q=80", title: "Case Study: A Mobile Health Clinic's Impact", date: "May 21, 2024", comments: 15, link: "/blog/mobile-clinic-case-study" },
         ]
     },
     footer: {
@@ -88,8 +88,8 @@ const translations: Record<string, any> = {
         { text: "About Us", link: "#about" },
         { text: "Our Services", link: "#services" },
         { text: "Projects Portfolio", link: "#portfolio" },
-        { text: "Careers", link: "#" },
-        { text: "Privacy Policy", link: "#" },
+        { text: "Careers", link: "/careers" },
+        { text: "Privacy Policy", link: "/privacy" },
       ],
       addressTitle: "Our Location",
       copyright: "© 2024 Civicavita AB. All Rights Reserved. For a better world.",
@@ -102,10 +102,10 @@ const translations: Record<string, any> = {
         title: "Meet Our Experts",
         subtitle: "A dedicated, multidisciplinary team of scientists, physicians, and specialists committed to global impact.",
         members: [
-            { img: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80', name: 'Dr. Evelyn Reed', title: 'Founder & Lead Scientist', bio: 'A UN physician with 20+ years of field experience in epidemiology and infectious diseases. Expert in global health policy and crisis response.', linkedin: '#' },
-            { img: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80', name: 'Dr. Ben Carter', title: 'Director of Data Science', bio: 'Specializes in predictive modeling for disease outbreaks and optimizing public health interventions. Holds a PhD from Karolinska Institutet.', linkedin: '#' },
-            { img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80', name: 'Amina El-Sayed', title: 'Head of Grant Management', bio: 'Expert in securing and managing large-scale grants from international bodies like the EU, WHO, and the Gates Foundation.', linkedin: '#' },
-            { img: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&q=80', name: 'Dr. Kenji Tanaka', title: 'Environmental Health Specialist', bio: 'Focuses on the intersection of climate change, water security, and public health. Leads our environmental science initiatives.', linkedin: '#' },
+            { img: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80', name: 'Dr. Evelyn Reed', title: 'Founder & Lead Scientist', bio: 'A UN physician with 20+ years of field experience in epidemiology and infectious diseases. Expert in global health policy and crisis response.', linkedin: 'https://linkedin.com' },
+            { img: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80', name: 'Dr. Ben Carter', title: 'Director of Data Science', bio: 'Specializes in predictive modeling for disease outbreaks and optimizing public health interventions. Holds a PhD from Karolinska Institutet.', linkedin: 'https://linkedin.com' },
+            { img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80', name: 'Amina El-Sayed', title: 'Head of Grant Management', bio: 'Expert in securing and managing large-scale grants from international bodies like the EU, WHO, and the Gates Foundation.', linkedin: 'https://linkedin.com' },
+            { img: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&q=80', name: 'Dr. Kenji Tanaka', title: 'Environmental Health Specialist', bio: 'Focuses on the intersection of climate change, water security, and public health. Leads our environmental science initiatives.', linkedin: 'https://linkedin.com' },
         ]
     },
     wasteToWealthPage: {
