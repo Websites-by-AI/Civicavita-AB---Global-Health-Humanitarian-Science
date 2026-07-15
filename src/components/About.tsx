@@ -65,6 +65,7 @@ export default function About() {
                     <img
                       src={FOUNDER.image}
                       alt={FOUNDER.name}
+                      referrerPolicy="no-referrer"
                       className="relative w-44 h-44 sm:w-52 sm:h-52 rounded-full object-cover ring-4 ring-primary-500/30 shadow-2xl"
                     />
                     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-bold shadow-lg whitespace-nowrap">

@@ -108,9 +108,9 @@ export const STATS = [
 export const FOUNDER = {
   name: 'Dr. Sahar Motallebi',
   title: 'MD, MPH',
-  image: '/images/sahar-motallebi.jpg',
+  image: 'https://iranacademia.com/wp-content/uploads/2022/03/sahar-Mo.jpg',
   linkedin: 'https://www.linkedin.com/in/sahar-motallebi-05108310/',
-  academia: 'https://www.academia.edu/',
+  academia: 'https://iranacademia.com/profile/sahar-motallebi/?lang=en',
 };
 
 export const FOUNDER_EXPERIENCE = [

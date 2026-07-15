@@ -4,7 +4,9 @@ export type Route =
   | { name: 'home' }
   | { name: 'blog' }
   | { name: 'post'; id: string }
-  | { name: 'admin' };
+  | { name: 'admin' }
+  | { name: 'ai' }
+  | { name: 'account' };
 
 interface RouterContextType {
   route: Route;
@@ -19,6 +21,8 @@ function parseHash(hash: string): Route {
   if (h === 'blog') return { name: 'blog' };
   if (h.startsWith('blog/')) return { name: 'post', id: h.slice(5) };
   if (h === 'admin') return { name: 'admin' };
+  if (h === 'ai') return { name: 'ai' };
+  if (h === 'account') return { name: 'account' };
   return { name: 'home' };
 }
 
@@ -32,6 +36,10 @@ function routeToHash(route: Route): string {
       return `#/blog/${route.id}`;
     case 'admin':
       return '#/admin';
+    case 'ai':
+      return '#/ai';
+    case 'account':
+      return '#/account';
   }
 }
 

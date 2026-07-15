@@ -41,6 +41,7 @@ export default function Team() {
                 <img
                   src={FOUNDER.image}
                   alt={FOUNDER.name}
+                  referrerPolicy="no-referrer"
                   className="relative w-32 h-32 rounded-full object-cover ring-4 ring-primary-500/50 shadow-xl"
                   loading="lazy"
                 />

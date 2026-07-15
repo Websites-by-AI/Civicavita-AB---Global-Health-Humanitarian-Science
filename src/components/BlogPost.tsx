@@ -4,6 +4,7 @@ import { useRouter } from '../context/RouterContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { formatDate } from '../data/posts';
 import { ArrowLeft, Calendar, Clock, Tag, User } from 'lucide-react';
+import CommentsSection from './CommentsSection';
 
 function renderContent(content: string): string {
   // Escape HTML
@@ -150,6 +151,8 @@ export default function BlogPost() {
             </span>
           ))}
         </div>
+
+        <CommentsSection postId={post.id} />
       </div>
     </div>
   );
