@@ -4,11 +4,9 @@ const rowToPost = (row) => ({ ...row, tags: JSON.parse(row.tags || "[]") });
 export async function onRequestGet({ request, env }) {
   const locale = new URL(request.url).searchParams.get("locale") || "en";
   const select = "SELECT id,title,excerpt,content,category,author,author_role AS authorRole,date,cover_emoji AS coverEmoji,cover_image AS coverImage,read_minutes AS readMinutes,tags,locale,translation_key AS translationKey FROM posts WHERE locale=? ORDER BY date DESC, created_at DESC";
-  let { results } = await env.DB.prepare(select).bind(locale).all();
-  // A language with no reviewed translations falls back to the English editorial source.
-  let usedFallback = false;
-  if (!results.length && locale !== "en") { ({ results } = await env.DB.prepare(select).bind("en").all()); usedFallback = true; }
-  return json({ posts: results.map(rowToPost), locale, usedFallback });
+  const { results } = await env.DB.prepare(select).bind(locale).all();
+  // Never silently show English content for another interface language.
+  return json({ posts: results.map(rowToPost), locale, usedFallback: false });
 }
 export async function onRequestPost({ request, env }) {
   if (!(await requireAdmin(request, env))) return unauthorized();

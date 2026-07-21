@@ -64,7 +64,7 @@ export default function BlogPost() {
   const { t } = useLanguage();
 
   const id = route.name === 'post' ? route.id : '';
-  const post = useMemo(() => posts.find((p) => p.id === id), [posts, id]);
+  const post = useMemo(() => posts.find((p) => p.id === id || p.translationKey === id || p.id.replace(/^(fa|sv|fr|ar)-/, '') === id), [posts, id]);
 
   if (!post) {
     return (
@@ -119,8 +119,8 @@ export default function BlogPost() {
         </h1>
 
         {/* Cover emoji banner */}
-        <div className="mb-10 h-56 rounded-3xl bg-gradient-to-br from-primary-600/20 via-corp-700 to-corp-800 border border-white/5 flex items-center justify-center text-8xl shadow-2xl">
-          {post.coverEmoji}
+        <div className="mb-10 h-56 rounded-3xl bg-gradient-to-br from-primary-600/20 via-corp-700 to-corp-800 border border-white/5 overflow-hidden shadow-2xl flex items-center justify-center text-8xl">
+          {post.coverImage ? <img src={post.coverImage} alt="" className="w-full h-full object-cover" /> : post.coverEmoji}
         </div>
 
         {/* Author */}

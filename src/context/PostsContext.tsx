@@ -24,7 +24,7 @@ export function PostsProvider({ children }: { children: ReactNode }) {
   const [databaseError, setDatabaseError] = useState<string | null>(null);
   const load = async () => {
     try { const data = await request(`/api/posts?locale=${encodeURIComponent(lang)}`); setPosts(data.posts); setDatabaseError(null); }
-    catch (error) { setPosts(SEED_POSTS); setDatabaseError(error instanceof Error ? error.message : 'Database unavailable'); }
+    catch (error) { setPosts(lang === 'en' ? SEED_POSTS : []); setDatabaseError(error instanceof Error ? error.message : 'Database unavailable'); }
   };
   useEffect(() => { void load(); }, [lang]);
   const addPost = async (post: Omit<BlogPost, 'id'>) => { const data = await request('/api/posts', { method: 'POST', body: JSON.stringify(post) }); setPosts((prev) => [data.post, ...prev]); return data.post.id; };

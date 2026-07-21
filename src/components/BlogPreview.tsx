@@ -44,7 +44,7 @@ export default function BlogPreview() {
           {latest.map((post, i) => (
             <article
               key={post.id}
-              onClick={() => navigate({ name: 'post', id: post.id })}
+              onClick={() => navigate({ name: 'post', id: post.translationKey || post.id })}
               className={`group cursor-pointer rounded-2xl glass overflow-hidden hover-lift transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
               style={{ transitionDelay: isVisible ? `${200 + i * 100}ms` : '0ms' }}
             >

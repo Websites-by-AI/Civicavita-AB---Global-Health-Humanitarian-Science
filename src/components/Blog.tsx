@@ -89,7 +89,7 @@ export default function Blog() {
             {filtered.map((post) => (
               <article
                 key={post.id}
-                onClick={() => navigate({ name: 'post', id: post.id })}
+                onClick={() => navigate({ name: 'post', id: post.translationKey || post.id })}
                 className="group cursor-pointer rounded-2xl glass overflow-hidden hover-lift flex flex-col"
               >
                 {/* Cover */}
