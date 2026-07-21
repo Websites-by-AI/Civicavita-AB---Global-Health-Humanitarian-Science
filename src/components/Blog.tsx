@@ -94,9 +94,7 @@ export default function Blog() {
               >
                 {/* Cover */}
                 <div className="relative h-44 bg-gradient-to-br from-primary-600/20 via-corp-700 to-corp-800 flex items-center justify-center">
-                  <div className="text-7xl group-hover:scale-110 transition-transform duration-500">
-                    {post.coverEmoji}
-                  </div>
+                  {post.coverImage ? <img src={post.coverImage} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="text-7xl group-hover:scale-110 transition-transform duration-500">{post.coverEmoji}</div>}
                   <div className="absolute top-3 end-3 px-2.5 py-1 rounded-full bg-primary-500/20 text-primary-400 text-[11px] font-semibold border border-primary-500/30">
                     {post.category}
                   </div>

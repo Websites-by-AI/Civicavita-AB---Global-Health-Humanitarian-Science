@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { Sparkles, FileText, ScrollText, FlaskConical, Copy, Check, Wand2, Search, Loader2 } from 'lucide-react';
-import { callOpenRouter, hasOpenRouterKey } from '../lib/openrouter';
-import { SettingsDB, OPENROUTER_MODELS } from '../db/settings';
+import MarkdownOutput from './MarkdownOutput';
 
 type ToolId = 'policy' | 'grant' | 'abstract' | 'grantFinder';
 
@@ -119,7 +118,7 @@ function generateAbstract(topic: string, methods: string, findings: string): str
 }
 
 export default function AITools() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { ref, isVisible } = useScrollAnimation(0.05);
   const [activeTool, setActiveTool] = useState<ToolId>('policy');
   const [copied, setCopied] = useState(false);
@@ -134,9 +133,7 @@ export default function AITools() {
   const [loading, setLoading] = useState(false);
   const [usedAI, setUsedAI] = useState(false);
 
-  const hasKey = hasOpenRouterKey();
-  const currentModel = SettingsDB.get().openrouter.model;
-  const modelLabel = OPENROUTER_MODELS.find(m => m.id === currentModel)?.name || currentModel;
+  const [aiUnavailable, setAiUnavailable] = useState(false);
 
   const tools: { id: ToolId; icon: React.ReactNode; title: string; desc: string }[] = [
     { id: 'policy', icon: <ScrollText className="w-5 h-5" />, title: t.ai.toolPolicy, desc: t.ai.toolPolicyDesc },
@@ -166,23 +163,18 @@ export default function AITools() {
       prompt = `You are a humanitarian funding specialist. Given this project: "${finder.project}" in region "${finder.region}", sector "${finder.sector}", budget "${finder.budget}", recommend 5 specific real donor opportunities (foundations, UN agencies, bilateral donors, EU instruments) that actually fund this kind of work. For each give: Donor name, Specific funding window/program, Typical grant size, Eligibility notes, Application tip. Use Markdown with headers per donor. Be specific — name real programs.`;
     }
 
-    if (hasKey) {
-      const res = await callOpenRouter(
-        [
-          { role: 'system', content: 'You are an expert humanitarian and public health consultant. Always respond in well-structured Markdown.' },
-          { role: 'user', content: prompt },
-        ],
-        fallback
-      );
-      setOutput(res.text || fallback);
-      setUsedAI(res.ok);
-    } else {
-      // Small artificial delay so the UX feels consistent
-      await new Promise(r => setTimeout(r, 400));
+    try {
+      const response = await fetch('/api/ai/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt, language: lang }) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'AI service unavailable');
+      setOutput(data.output);
+      setUsedAI(true);
+      setAiUnavailable(false);
+    } catch {
       setOutput(fallback);
       setUsedAI(false);
-    }
-    setLoading(false);
+      setAiUnavailable(true);
+    } finally { setLoading(false); }
   };
 
   const generateGrantFinderFallback = (f: typeof finder): string => {
@@ -253,9 +245,9 @@ export default function AITools() {
 
         {/* Status bar */}
         <div className="mb-4 flex flex-wrap items-center justify-center gap-3 text-xs">
-          <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${hasKey ? 'bg-green-500/15 text-green-400 border border-green-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${hasKey ? 'bg-green-400' : 'bg-amber-400'} animate-pulse`} />
-            {hasKey ? `${t.ai.aiStatusOn} · ${modelLabel}` : t.ai.aiStatusOff}
+          <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${aiUnavailable ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-green-500/15 text-green-400 border border-green-500/30'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${aiUnavailable ? 'bg-amber-400' : 'bg-green-400'} animate-pulse`} />
+            {aiUnavailable ? t.ai.aiStatusOff : t.ai.aiStatusOn}
           </div>
         </div>
 
@@ -398,7 +390,7 @@ export default function AITools() {
                   <p className="text-sm">{t.ai.aiThinking}</p>
                 </div>
               ) : output ? (
-                <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">{output}</pre>
+                <MarkdownOutput content={output} />
               ) : (
                 <div className="text-center py-16 text-gray-500">
                   <Wand2 className="w-10 h-10 mx-auto mb-3 opacity-50" />

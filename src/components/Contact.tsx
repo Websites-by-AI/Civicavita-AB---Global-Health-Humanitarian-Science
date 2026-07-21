@@ -19,9 +19,9 @@ export default function Contact() {
   };
 
   const contactItems = [
-    { icon: <Mail className="w-5 h-5" />, label: t.contact.email, value: 'info@civicavita.se', href: 'mailto:info@civicavita.se' },
-    { icon: <Phone className="w-5 h-5" />, label: t.contact.phone, value: '+46 (0) 8 123 456 78', href: 'tel:+4681234567' },
-    { icon: <MapPin className="w-5 h-5" />, label: t.contact.address, value: t.contact.addressValue, href: '#' },
+    { icon: <Mail className="w-5 h-5" />, label: t.contact.email, value: 'smotallebi@civicavita.org', href: 'mailto:smotallebi@civicavita.org' },
+    { icon: <Phone className="w-5 h-5" />, label: t.contact.phone, value: '+46 739751973', href: 'tel:+46739751973' },
+    { icon: <MapPin className="w-5 h-5" />, label: t.contact.address, value: 'Lantmannagatan 6 C, 214 44 Malmö', href: 'https://www.google.com/maps/search/?api=1&query=Lantmannagatan+6+C,+214+44+Malm%C3%B6' },
     { icon: <Globe className="w-5 h-5" />, label: t.contact.workingHours, value: t.contact.workingHoursValue, href: '#' },
   ];
 
@@ -59,7 +59,7 @@ export default function Contact() {
             ))}
             <div className="rounded-2xl overflow-hidden glass h-48">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2034.6313553827696!2d18.06267!3d59.33382!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465f9d5a5a5d5d5d%3A0x5a5a5a5a5a5a5a5a!2sKungsgatan%2044%2C%20111%2035%20Stockholm!5e0!3m2!1sen!2sse!4v1700000000000"
+                src="https://www.google.com/maps?q=Lantmannagatan+6+C,+214+44+Malm%C3%B6&output=embed"
                 width="100%" height="100%"
                 style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg) brightness(0.8) contrast(1.2)' }}
                 allowFullScreen loading="lazy" title="Office Location"

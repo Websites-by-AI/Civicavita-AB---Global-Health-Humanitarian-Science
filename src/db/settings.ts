@@ -26,9 +26,9 @@ export interface SiteSettings {
 export const DEFAULT_SETTINGS: SiteSettings = {
   siteName: 'Civicavita AB',
   tagline: 'Global Health & Humanitarian Science',
-  contactEmail: 'info@civicavita.se',
-  contactPhone: '+46 (0) 8 123 456 78',
-  address: 'Kungsgatan 44, 111 35 Stockholm, Sweden',
+  contactEmail: 'smotallebi@civicavita.org',
+  contactPhone: '+46 739751973',
+  address: 'Lantmannagatan 6 C, 214 44 Malmö, Sweden',
   social: {
     twitter: 'https://twitter.com/',
     linkedin: 'https://linkedin.com/in/sahar-motallebi-05108310/',

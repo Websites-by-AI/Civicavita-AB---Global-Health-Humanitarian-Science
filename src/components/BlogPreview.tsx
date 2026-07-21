@@ -16,7 +16,7 @@ export default function BlogPreview() {
     .slice(0, 3);
 
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden">
+    <section id="insights" className="relative py-24 sm:py-32 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-corp-900 via-corp-800/50 to-corp-900" />
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary-500/30 to-transparent" />
 
@@ -49,7 +49,7 @@ export default function BlogPreview() {
               style={{ transitionDelay: isVisible ? `${200 + i * 100}ms` : '0ms' }}
             >
               <div className="relative h-40 bg-gradient-to-br from-primary-600/20 via-corp-700 to-corp-800 flex items-center justify-center">
-                <div className="text-6xl group-hover:scale-110 transition-transform duration-500">{post.coverEmoji}</div>
+                {post.coverImage ? <img src={post.coverImage} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="text-6xl group-hover:scale-110 transition-transform duration-500">{post.coverEmoji}</div>}
                 <div className="absolute top-3 end-3 px-2.5 py-1 rounded-full bg-primary-500/20 text-primary-400 text-[11px] font-semibold border border-primary-500/30">
                   {post.category}
                 </div>

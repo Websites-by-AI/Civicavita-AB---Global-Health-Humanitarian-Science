@@ -2,9 +2,6 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
 import Services from './components/Services';
-import Projects from './components/Projects';
-import Impact from './components/Impact';
-import Team from './components/Team';
 import BlogPreview from './components/BlogPreview';
 import CTABanner from './components/CTABanner';
 import Contact from './components/Contact';
@@ -14,7 +11,6 @@ import BlogPost from './components/BlogPost';
 import AdminPanel from './components/AdminPanel';
 import AITools from './components/AITools';
 import UserAccount from './components/UserAccount';
-import DemoAccess from './components/DemoAccess';
 import { useState, useEffect } from 'react';
 import { ArrowUp } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
@@ -46,9 +42,6 @@ function HomePage() {
       <Hero />
       <About />
       <Services />
-      <Projects />
-      <Impact />
-      <Team />
       <BlogPreview />
       <CTABanner />
       <Contact />
@@ -73,7 +66,6 @@ function AppContent() {
       </main>
       <Footer />
       <ScrollToTop />
-      <DemoAccess />
     </div>
   );
 }

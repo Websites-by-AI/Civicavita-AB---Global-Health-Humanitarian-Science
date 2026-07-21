@@ -1,4 +1,5 @@
-import { Globe2, ArrowUp, Heart } from 'lucide-react';
+import { ArrowUp, Heart } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../context/RouterContext';
 
@@ -25,14 +26,7 @@ export default function Footer() {
         <div className="py-16 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10">
           {/* Brand */}
           <div className="col-span-2 md:col-span-4 lg:col-span-2">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg">
-                <Globe2 className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-lg font-bold text-white tracking-tight">
-                Civicavita<span className="text-primary-400">.AB</span>
-              </span>
-            </div>
+            <div className="mb-5"><BrandLogo /></div>
             <p className="text-gray-400 text-sm leading-relaxed max-w-sm mb-6">{t.footer.description}</p>
             <div className="flex items-center gap-3">
               {[

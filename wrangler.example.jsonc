@@ -1,0 +1,7 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "civicavita-ab---global-health-humanitarian-science",
+  "compatibility_date": "2026-06-15",
+  "pages_build_output_dir": "dist",
+  "d1_databases": [{ "binding": "DB", "database_name": "civicavita", "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID" }]
+}

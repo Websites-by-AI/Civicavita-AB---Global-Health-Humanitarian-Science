@@ -8,6 +8,7 @@ import { CommentsDB, type Comment } from '../db/comments';
 import { SettingsDB, type SiteSettings, DEFAULT_SETTINGS, OPENROUTER_MODELS } from '../db/settings';
 import { AuditLog } from '../db/audit';
 import { type BlogPost, createEmptyPost, estimateReadMinutes, formatDate } from '../data/posts';
+import { FOUNDER, FOUNDER_EXPERIENCE, FOUNDER_EDUCATION, FOUNDER_COURSES, FOUNDER_PUBLICATIONS } from '../data/constants';
 
 // Backward-compatible shim: the old code used db.audit.log(...) — keep it working
 const db = { audit: AuditLog };
@@ -16,10 +17,10 @@ import {
   LayoutDashboard, MessageSquare, Settings as SettingsIcon, Download, ShieldCheck, Users as UsersIcon, Check, XCircle, Crown,
 } from 'lucide-react';
 
-type Tab = 'dashboard' | 'posts' | 'users' | 'comments' | 'settings' | 'backup' | 'audit';
+type Tab = 'dashboard' | 'posts' | 'profile' | 'users' | 'comments' | 'settings' | 'backup' | 'audit';
 
 export default function AdminPanel() {
-  const { posts, addPost, updatePost, deletePost, resetPosts } = usePosts();
+  const { posts, addPost, updatePost, deletePost, resetPosts, databaseError } = usePosts();
   const { navigate } = useRouter();
   const { user, isAuthed, login, register, logout, isLoading } = useAuth();
   const isDemo = user?.id === 'demo';
@@ -88,23 +89,23 @@ export default function AdminPanel() {
   const openEdit = (post: BlogPost) => { const { id: _id, ...rest } = post; void _id; setForm(rest); setEditingId(post.id); setIsCreating(false); };
   const openCreate = () => { setForm(createEmptyPost()); setEditingId(null); setIsCreating(true); setTab('posts'); };
   const closeForm = () => { setEditingId(null); setIsCreating(false); setForm(createEmptyPost()); };
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim() || !form.content.trim()) return;
     const withReadTime = { ...form, readMinutes: estimateReadMinutes(form.content) };
-    if (editingId) { updatePost(editingId, withReadTime); db.audit.log('POST_UPDATE', user, `id=${editingId}`); }
+    if (editingId) { await updatePost(editingId, withReadTime); db.audit.log('POST_UPDATE', user, `id=${editingId}`); }
     else {
-      const newId = addPost(withReadTime);
+      const newId = await addPost(withReadTime);
       db.audit.log('POST_CREATE', user, `id=${newId}`);
       navigate({ name: 'post', id: newId });
     }
     closeForm();
     showToast(t.admin.toastPostSaved);
   };
-  const handleDelete = (id: string) => {
-    if (confirm(t.admin.confirmDelete)) { deletePost(id); db.audit.log('POST_DELETE', user, `id=${id}`); showToast(t.admin.toastPostDeleted); }
+  const handleDelete = async (id: string) => {
+    if (confirm(t.admin.confirmDelete)) { try { await deletePost(id); db.audit.log('POST_DELETE', user, `id=${id}`); showToast(t.admin.toastPostDeleted); } catch (error) { showToast(error instanceof Error ? error.message : 'Could not delete post'); } }
   };
-  const handleResetAll = () => { if (confirm(t.admin.confirmReset)) { resetPosts(); db.audit.log('POSTS_RESET', user); showToast(t.admin.toastPostsReset); } };
+  const handleResetAll = async () => { if (confirm(t.admin.confirmReset)) { await resetPosts(); db.audit.log('POSTS_RESET', user); showToast(t.admin.toastPostsReset); } };
 
   // ── Users handlers ──
   const deleteUser = async (u: DBUser) => {
@@ -199,7 +200,7 @@ export default function AdminPanel() {
             <button onClick={() => { setMode('login'); setAuthError(''); }} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${mode === 'login' ? 'bg-primary-500 text-white shadow' : 'text-gray-400 hover:text-white'}`}>{t.admin.login}</button>
             <button onClick={() => { setMode('register'); setRegError(''); setRegSuccess(''); }} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${mode === 'register' ? 'bg-primary-500 text-white shadow' : 'text-gray-400 hover:text-white'}`}><UserPlus className="w-4 h-4" />{t.admin.register}</button>
           </div>
-          <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-primary-500/15 to-blue-500/10 border border-primary-500/30">
+          <div className="hidden">
             <div className="flex items-center gap-2 mb-2"><Sparkles className="w-4 h-4 text-primary-400" /><span className="text-xs font-bold text-primary-400 uppercase tracking-wider">{t.admin.demoTitle}</span></div>
             <p className="text-xs text-gray-300 mb-3">{t.admin.demoDescription}</p>
             <div className="space-y-1 text-xs font-mono mb-3">
@@ -259,6 +260,7 @@ export default function AdminPanel() {
   const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: t.admin.tabDashboard, icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'posts', label: t.admin.tabPosts, icon: <FileText className="w-4 h-4" /> },
+    { id: 'profile', label: 'Private profile', icon: <ShieldCheck className="w-4 h-4" /> },
     { id: 'users', label: t.admin.tabUsers, icon: <UsersIcon className="w-4 h-4" /> },
     { id: 'comments', label: `${t.admin.tabComments}${pendingComments.length > 0 ? ` (${pendingComments.length})` : ''}`, icon: <MessageSquare className="w-4 h-4" /> },
     { id: 'settings', label: t.admin.tabSettings, icon: <SettingsIcon className="w-4 h-4" /> },
@@ -293,6 +295,8 @@ export default function AdminPanel() {
             <Check className="w-4 h-4" />{toast}
           </div>
         )}
+
+        {databaseError && <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm">Database fallback is active: {databaseError}. Run the D1 migration and confirm the DB binding.</div>}
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-6 p-1.5 rounded-xl glass-light">
@@ -362,7 +366,7 @@ export default function AdminPanel() {
                 <div className="flex items-center justify-between mb-4"><h3 className="text-xl font-bold text-white">{editingId ? t.admin.editPost : t.admin.createPost}</h3><button type="button" onClick={closeForm} className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/10"><X className="w-5 h-5" /></button></div>
                 <div className="grid sm:grid-cols-2 gap-4 mb-4">
                   <div><label className="block text-sm font-medium text-gray-300 mb-2">{t.admin.fieldTitle}</label><input type="text" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50" /></div>
-                  <div><label className="block text-sm font-medium text-gray-300 mb-2">{t.admin.fieldCategory}</label><input type="text" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50" /></div>
+                  <div><label className="block text-sm font-medium text-gray-300 mb-2">{t.admin.fieldCategory}</label><input type="text" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50" /></div><div><label className="block text-sm font-medium text-gray-300 mb-2">Post language</label><select value={form.locale || 'en'} onChange={(e) => setForm({ ...form, locale: e.target.value as any })} className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"><option className="bg-corp-800" value="en">English</option><option className="bg-corp-800" value="fa">فارسی</option><option className="bg-corp-800" value="sv">Svenska</option><option className="bg-corp-800" value="fr">Français</option><option className="bg-corp-800" value="ar">العربية</option></select></div>
                 </div>
                 <div className="mb-4"><label className="block text-sm font-medium text-gray-300 mb-2">{t.admin.fieldExcerpt}</label><textarea rows={2} value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none" placeholder={t.admin.fieldExcerptPlaceholder} /></div>
                 <div className="mb-4"><label className="block text-sm font-medium text-gray-300 mb-2">{t.admin.fieldContent} <span className="text-xs text-gray-500">{t.admin.markdownHint}</span></label><textarea rows={12} required value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-y" /></div>
@@ -392,6 +396,18 @@ export default function AdminPanel() {
               )}
             </div>
           </>
+        )}
+
+        {/* ═══════════ PRIVATE FOUNDER PROFILE TAB ═══════════ */}
+        {tab === 'profile' && (
+          <section className="max-w-5xl space-y-6">
+            <div className="rounded-2xl glass p-6 border border-primary-500/20">
+              <div className="flex items-start gap-4"><ShieldCheck className="w-7 h-7 text-primary-400 flex-shrink-0" /><div><h3 className="text-xl font-bold text-white">Private founder profile</h3><p className="text-sm text-gray-400 mt-2">This detailed professional record is visible only in the authenticated admin dashboard. It is intentionally not shown on the public website.</p></div></div>
+            </div>
+            <div className="rounded-2xl glass p-6"><h3 className="text-2xl font-bold text-white">{FOUNDER.name}</h3><p className="text-primary-400 mt-1">Founder & Lead Researcher · CIVICAVITA AB</p><p className="text-gray-400 mt-4 text-sm">Use this area as the verified source of truth before publishing any biography, project, partner or career claim.</p></div>
+            <div className="grid lg:grid-cols-2 gap-6"><div className="rounded-2xl glass p-6"><h4 className="font-bold text-white mb-4">Professional experience</h4><div className="space-y-3">{FOUNDER_EXPERIENCE.map((item) => <div key={`${item.year}-${item.org}`} className="border-s-2 border-primary-500/50 ps-3"><p className="text-sm text-white">{item.org}</p><p className="text-xs text-gray-400">{item.year} · {item.location}</p></div>)}</div></div><div className="rounded-2xl glass p-6"><h4 className="font-bold text-white mb-4">Education & selected publications</h4><div className="space-y-3">{FOUNDER_EDUCATION.map((item) => <div key={item.place}><p className="text-sm text-white">{item.place}</p><p className="text-xs text-gray-400">{item.year}</p></div>)}<hr className="border-white/10 my-4"/>{FOUNDER_PUBLICATIONS.map((item) => <div key={item.title}><p className="text-sm text-white">{item.title}</p><p className="text-xs text-gray-400">{item.year} · {item.journal}</p></div>)}</div></div></div>
+            <div className="rounded-2xl glass p-6"><h4 className="font-bold text-white mb-4">Courses & certifications</h4><ul className="grid sm:grid-cols-2 gap-2 text-sm text-gray-300">{FOUNDER_COURSES.map((item) => <li key={item}>• {item}</li>)}</ul></div>
+          </section>
         )}
 
         {/* ═══════════ USERS TAB ═══════════ */}
@@ -473,43 +489,7 @@ export default function AdminPanel() {
               <div><label className="block text-sm font-medium text-gray-300 mb-2">{t.admin.settingAccent}</label><input type="color" value={settings.accentColor} onChange={(e) => setSettings({ ...settings, accentColor: e.target.value })} className="w-full h-11 rounded-xl bg-white/5 border border-white/10 cursor-pointer" /></div>
             </div>
 
-            {/* OpenRouter Integration */}
-            <div className="my-6 p-4 rounded-xl bg-gradient-to-br from-blue-500/5 to-violet-500/5 border border-blue-500/20">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-blue-400" />
-                <h4 className="font-bold text-white">{(t.admin as any).openrouterTitle || 'OpenRouter API'}</h4>
-                {settings.openrouter.apiKey ? (
-                  <span className="ms-auto text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 font-semibold">ACTIVE</span>
-                ) : (
-                  <span className="ms-auto text-[10px] px-2 py-0.5 rounded-full bg-gray-500/20 text-gray-400 border border-gray-500/30 font-semibold">OFF</span>
-                )}
-              </div>
-              <p className="text-xs text-gray-400 mb-3 leading-relaxed">
-                {(t.admin as any).openrouterDescription || 'Connect to OpenRouter to power AI tools with real LLMs (GPT-4o, Claude, Gemini, Llama, etc.). Get a free key at openrouter.ai.'}
-              </p>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1.5">{(t.admin as any).openrouterKey || 'API Key'}</label>
-                  <input type="password" value={settings.openrouter.apiKey} onChange={(e) => setSettings({ ...settings, openrouter: { ...settings.openrouter, apiKey: e.target.value } })} placeholder="sk-or-v1-..." className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1.5">{(t.admin as any).openrouterModel || 'Model'}</label>
-                  <select value={settings.openrouter.model} onChange={(e) => setSettings({ ...settings, openrouter: { ...settings.openrouter, model: e.target.value } })} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                    {OPENROUTER_MODELS.map(m => <option key={m.id} value={m.id} className="bg-corp-800">{m.name}</option>)}
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-300 mb-1.5">{(t.admin as any).openrouterSiteName || 'Site name (sent to OpenRouter)'}</label>
-                    <input type="text" value={settings.openrouter.siteName} onChange={(e) => setSettings({ ...settings, openrouter: { ...settings.openrouter, siteName: e.target.value } })} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-300 mb-1.5">{(t.admin as any).openrouterSiteUrl || 'Site URL'}</label>
-                    <input type="text" value={settings.openrouter.siteUrl} onChange={(e) => setSettings({ ...settings, openrouter: { ...settings.openrouter, siteUrl: e.target.value } })} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div className="my-6 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 text-sm text-gray-300">AI provider keys are managed as Cloudflare Secrets. They are not entered or stored in this browser.</div>
             <div className="space-y-3 my-6 p-4 rounded-xl bg-white/[0.02] border border-white/5">
               <label className="flex items-center justify-between cursor-pointer"><span className="text-sm text-gray-300">{t.admin.settingCommentsEnabled}</span><input type="checkbox" checked={settings.commentsEnabled} onChange={(e) => setSettings({ ...settings, commentsEnabled: e.target.checked })} className="w-5 h-5 accent-primary-500" /></label>
               <label className="flex items-center justify-between cursor-pointer"><span className="text-sm text-gray-300">{t.admin.settingAutoApprove}</span><input type="checkbox" checked={settings.autoApproveComments} onChange={(e) => setSettings({ ...settings, autoApproveComments: e.target.checked })} className="w-5 h-5 accent-primary-500" /></label>

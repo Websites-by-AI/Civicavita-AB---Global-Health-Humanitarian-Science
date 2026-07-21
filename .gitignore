@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Cloudflare/Pages secrets
+.dev.vars*
+.env
+.env.*
+!.env.example

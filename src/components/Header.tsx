@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, Globe2, ChevronDown, LogIn, User as UserIcon, LogOut, LayoutDashboard, Sparkles } from 'lucide-react';
+import { Menu, X, ChevronDown, LogIn, User as UserIcon, LogOut, LayoutDashboard, Sparkles } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 import { useLanguage, LANGUAGES } from '../i18n/LanguageContext';
 import { useRouter } from '../context/RouterContext';
 import { useAuth } from '../context/AuthContext';
-import AuthModal from './AuthModal';
 
-type NavKey = 'home' | 'about' | 'services' | 'projects' | 'impact' | 'team' | 'blog' | 'ai' | 'contact';
-const NAV_KEYS: NavKey[] = ['home', 'about', 'services', 'projects', 'impact', 'team', 'blog', 'ai', 'contact'];
-const SCROLL_KEYS: NavKey[] = ['home', 'about', 'services', 'projects', 'impact', 'team', 'contact'];
+type NavKey = 'home' | 'about' | 'services' | 'blog' | 'ai' | 'contact';
+const NAV_KEYS: NavKey[] = ['home', 'about', 'services', 'blog', 'ai', 'contact'];
+const SCROLL_KEYS: NavKey[] = ['home', 'about', 'services', 'contact'];
 
 export default function Header() {
   const { t, lang, setLang, dir } = useLanguage();
@@ -18,8 +18,6 @@ export default function Header() {
   const [activeSection, setActiveSection] = useState<string>('home');
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const langRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
@@ -76,12 +74,7 @@ export default function Header() {
     }
   };
 
-  const openAuth = (mode: 'login' | 'register') => {
-    setAuthMode(mode);
-    setAuthModalOpen(true);
-    setIsUserMenuOpen(false);
-    setIsMobileMenuOpen(false);
-  };
+  const openAdmin = () => { navigate({ name: 'admin' }); setIsUserMenuOpen(false); setIsMobileMenuOpen(false); };
 
   const currentLang = LANGUAGES.find((l) => l.code === lang)!;
 
@@ -91,13 +84,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <button onClick={() => navigate({ name: 'home' })} className="flex items-center gap-3 group">
-              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/25 group-hover:shadow-primary-500/40 transition-shadow">
-                <Globe2 className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-white tracking-tight leading-none">Civicavita<span className="text-primary-400">.AB</span></span>
-                <span className="text-[10px] text-gray-400 tracking-widest uppercase font-medium">Global Health</span>
-              </div>
+              <BrandLogo />
             </button>
 
             <nav className="hidden lg:flex items-center gap-1">
@@ -136,7 +123,7 @@ export default function Header() {
               {/* Login / User menu */}
               {!isAuthed ? (
                 <button
-                  onClick={() => openAuth('login')}
+                  onClick={openAdmin}
                   className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 glass-light hover:bg-white/10 text-white text-sm font-medium rounded-full transition-all"
                 >
                   <LogIn className="w-4 h-4 text-primary-400" />
@@ -219,10 +206,10 @@ export default function Header() {
             <div className="pt-4 border-t border-white/5 mt-4 space-y-2">
               {!isAuthed ? (
                 <>
-                  <button onClick={() => openAuth('login')} className="w-full px-4 py-3 glass-light text-white font-medium rounded-xl flex items-center justify-center gap-2">
+                  <button onClick={openAdmin} className="w-full px-4 py-3 glass-light text-white font-medium rounded-xl flex items-center justify-center gap-2">
                     <LogIn className="w-4 h-4 text-primary-400" />{t.header.signIn}
                   </button>
-                  <button onClick={() => openAuth('register')} className="w-full px-4 py-3 text-sm text-gray-400 hover:text-white rounded-xl">
+                  <button onClick={openAdmin} className="w-full px-4 py-3 text-sm text-gray-400 hover:text-white rounded-xl">
                     {t.admin.registerLink}
                   </button>
                 </>
@@ -253,7 +240,6 @@ export default function Header() {
         </div>
       </div>
 
-      <AuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} initialMode={authMode} />
     </>
   );
 }
