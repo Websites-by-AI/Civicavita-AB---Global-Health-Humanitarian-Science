@@ -24,6 +24,9 @@ export default function AdminPanel() {
   const { navigate } = useRouter();
   const { user, isAuthed, login, register, logout, isLoading } = useAuth();
   const isDemo = user?.id === 'demo';
+  const isBootstrapAdmin = user?.id === 'bootstrap-admin';
+  const [setupMessage, setSetupMessage] = useState<string | null>(null);
+  const [passwordChange, setPasswordChange] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
   // Merge adminExtra translations into admin for unified access (typed as any to allow extended keys)
   const _lang = useLanguage();
@@ -56,6 +59,19 @@ export default function AdminPanel() {
   const currentUser = user?.name || null;
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
+  const initializeD1Admin = async () => {
+    if (!confirm('Create the primary website administrator in D1?')) return;
+    const res = await fetch('/api/admin/database/initialize', { method: 'POST', credentials: 'same-origin' });
+    const data = await res.json().catch(() => ({}));
+    setSetupMessage(data.message || data.error || 'Setup failed');
+  };
+  const changeDatabasePassword = async () => {
+    if (passwordChange.newPassword !== passwordChange.confirmPassword) return setSetupMessage('New passwords do not match.');
+    const res = await fetch('/api/auth/change-password', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(passwordChange) });
+    const data = await res.json().catch(() => ({}));
+    setSetupMessage(data.message || data.error || 'Password update failed');
+    if (data.ok) setPasswordChange({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  };
 
   // Reload dashboard data when tab changes or authed
   const refresh = async () => {
@@ -400,13 +416,14 @@ export default function AdminPanel() {
 
         {/* ═══════════ PRIVATE FOUNDER PROFILE TAB ═══════════ */}
         {tab === 'profile' && (
-          <section className="max-w-5xl space-y-6">
+          <section className="max-w-5xl space-y-6">{isBootstrapAdmin && <div className="rounded-2xl glass p-6 border border-amber-500/30"><h3 className="font-bold text-white">Create D1 website admin</h3><p className="text-sm text-gray-400 mt-2">This one-time step creates a WordPress-style admin account in D1 using a secure password hash.</p><button onClick={initializeD1Admin} className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-xl font-semibold">Create primary admin in D1</button>{setupMessage && <p className="text-sm text-primary-300 mt-3">{setupMessage}</p>}</div>}
             <div className="rounded-2xl glass p-6 border border-primary-500/20">
               <div className="flex items-start gap-4"><ShieldCheck className="w-7 h-7 text-primary-400 flex-shrink-0" /><div><h3 className="text-xl font-bold text-white">Private founder profile</h3><p className="text-sm text-gray-400 mt-2">This detailed professional record is visible only in the authenticated admin dashboard. It is intentionally not shown on the public website.</p></div></div>
             </div>
             <div className="rounded-2xl glass p-6"><h3 className="text-2xl font-bold text-white">{FOUNDER.name}</h3><p className="text-primary-400 mt-1">Founder & Lead Researcher · CIVICAVITA AB</p><p className="text-gray-400 mt-4 text-sm">Use this area as the verified source of truth before publishing any biography, project, partner or career claim.</p></div>
             <div className="grid lg:grid-cols-2 gap-6"><div className="rounded-2xl glass p-6"><h4 className="font-bold text-white mb-4">Professional experience</h4><div className="space-y-3">{FOUNDER_EXPERIENCE.map((item) => <div key={`${item.year}-${item.org}`} className="border-s-2 border-primary-500/50 ps-3"><p className="text-sm text-white">{item.org}</p><p className="text-xs text-gray-400">{item.year} · {item.location}</p></div>)}</div></div><div className="rounded-2xl glass p-6"><h4 className="font-bold text-white mb-4">Education & selected publications</h4><div className="space-y-3">{FOUNDER_EDUCATION.map((item) => <div key={item.place}><p className="text-sm text-white">{item.place}</p><p className="text-xs text-gray-400">{item.year}</p></div>)}<hr className="border-white/10 my-4"/>{FOUNDER_PUBLICATIONS.map((item) => <div key={item.title}><p className="text-sm text-white">{item.title}</p><p className="text-xs text-gray-400">{item.year} · {item.journal}</p></div>)}</div></div></div>
             <div className="rounded-2xl glass p-6"><h4 className="font-bold text-white mb-4">Courses & certifications</h4><ul className="grid sm:grid-cols-2 gap-2 text-sm text-gray-300">{FOUNDER_COURSES.map((item) => <li key={item}>• {item}</li>)}</ul></div>
+            {!isBootstrapAdmin && <div className="rounded-2xl glass p-6"><h4 className="font-bold text-white mb-4">Change admin password</h4><div className="grid sm:grid-cols-3 gap-3"><input type="password" value={passwordChange.currentPassword} onChange={e=>setPasswordChange({...passwordChange,currentPassword:e.target.value})} placeholder="Current password" className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white"/><input type="password" value={passwordChange.newPassword} onChange={e=>setPasswordChange({...passwordChange,newPassword:e.target.value})} placeholder="New password (12+ chars)" className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white"/><input type="password" value={passwordChange.confirmPassword} onChange={e=>setPasswordChange({...passwordChange,confirmPassword:e.target.value})} placeholder="Confirm password" className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white"/></div><button onClick={changeDatabasePassword} className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-xl font-semibold">Update password</button>{setupMessage && <p className="text-sm text-primary-300 mt-3">{setupMessage}</p>}</div>}
           </section>
         )}
 

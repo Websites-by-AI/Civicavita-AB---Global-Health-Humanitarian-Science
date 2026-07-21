@@ -1,14 +1,2 @@
-import { createSession, json, sessionCookie } from "../../_lib.js";
-export async function onRequestPost({ request, env }) {
-  try {
-    const { email, password } = await request.json();
-    if (!env.ADMIN_EMAIL || !env.ADMIN_PASSWORD || !env.JWT_SECRET) {
-      return json({ error: "Admin secrets are not configured." }, 503);
-    }
-    if (String(email).trim().toLowerCase() !== env.ADMIN_EMAIL.toLowerCase() || password !== env.ADMIN_PASSWORD) {
-      return json({ error: "Invalid email or password." }, 401);
-    }
-    const token = await createSession(env);
-    return json({ ok: true, user: { id: "admin", name: "Administrator", email: env.ADMIN_EMAIL, role: "admin" } }, 200, { "Set-Cookie": sessionCookie(token) });
-  } catch { return json({ error: "Invalid request." }, 400); }
-}
+import { createUserSession, json, verifyPassword, countAdmins, cookie } from '../../_auth.js';
+export async function onRequestPost({request,env}) { try { const {email,password}=await request.json(); const normalized=String(email||'').trim().toLowerCase(); if(!normalized||!password)return json({error:'Email and password are required.'},400); let user=await env.DB.prepare('SELECT * FROM users WHERE lower(email)=? AND is_active=1').bind(normalized).first(); if(user) { if(!(await verifyPassword(password,user.password_salt,user.password_hash)))return json({error:'Invalid email or password.'},401); } else if((await countAdmins(env))===0 && env.ADMIN_EMAIL && normalized===env.ADMIN_EMAIL.toLowerCase() && password===env.ADMIN_PASSWORD) { user={id:'bootstrap-admin',name:'Primary administrator',email:env.ADMIN_EMAIL,role:'admin'}; } else return json({error:'Invalid email or password.'},401); if(user.id!=='bootstrap-admin') await env.DB.prepare('UPDATE users SET last_login_at=CURRENT_TIMESTAMP WHERE id=?').bind(user.id).run(); const token=await createUserSession(user,env); return json({ok:true,user:{id:user.id,name:user.name,email:user.email,role:user.role,createdAt:user.created_at}},200,{'Set-Cookie':cookie(token)}); } catch(e){console.error(e);return json({error:'Login failed.'},500);} }

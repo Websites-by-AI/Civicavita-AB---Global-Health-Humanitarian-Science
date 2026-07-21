@@ -1,0 +1,31 @@
+name: Apply CIVICAVITA D1 migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'migrations/**'
+      - '.github/workflows/d1-migrations.yml'
+  workflow_dispatch:
+
+# This workflow updates D1 only. Cloudflare Pages continues to deploy the site
+# automatically from GitHub. Secrets are configured in GitHub, never in code.
+jobs:
+  apply-migrations:
+    name: Apply D1 schema and content migrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply pending D1 migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@latest d1 migrations apply civicavita --remote
