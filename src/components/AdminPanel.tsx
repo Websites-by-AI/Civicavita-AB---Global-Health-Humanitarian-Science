@@ -5,7 +5,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth, DEMO_ADMIN_EMAIL, DEMO_ADMIN_PASSWORD } from '../context/AuthContext';
 import { UsersDB, type DBUser } from '../db/users';
 import { CommentsDB, type Comment } from '../db/comments';
-import { SettingsDB, type SiteSettings, DEFAULT_SETTINGS, OPENROUTER_MODELS } from '../db/settings';
+import { SettingsDB, type SiteSettings, DEFAULT_SETTINGS } from '../db/settings';
 import { AuditLog } from '../db/audit';
 import { type BlogPost, createEmptyPost, estimateReadMinutes, formatDate } from '../data/posts';
 import { FOUNDER, FOUNDER_EXPERIENCE, FOUNDER_EDUCATION, FOUNDER_COURSES, FOUNDER_PUBLICATIONS } from '../data/constants';
