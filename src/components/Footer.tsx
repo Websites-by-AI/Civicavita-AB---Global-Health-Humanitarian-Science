@@ -100,8 +100,8 @@ export default function Footer() {
             <button onClick={() => navigate({ name: 'blog' })} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
               {t.nav.blog}
             </button>
-            <button onClick={() => navigate({ name: 'admin' })} className="text-xs text-gray-600 hover:text-gray-400 transition-colors" title="Admin">
-              ⚙
+            <button onClick={() => navigate({ name: 'admin' })} className="text-xs text-gray-400 hover:text-primary-300 transition-colors inline-flex items-center gap-1" title="Admin Login">
+              ⚙ <span>Admin Login</span>
             </button>
             <button onClick={scrollToTop} className="w-9 h-9 rounded-lg glass-light flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all" aria-label="Back to top">
               <ArrowUp className="w-4 h-4" />
