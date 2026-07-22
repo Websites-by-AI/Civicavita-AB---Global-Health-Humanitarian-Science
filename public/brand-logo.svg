@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="220" viewBox="0 0 760 220" role="img" aria-labelledby="title desc">
+  <title id="title">Civicavita AB</title><desc id="desc">Civicavita in green, AB in an orange-to-green gradient.</desc>
+  <defs><linearGradient id="ab" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#f97316"/><stop offset=".5" stop-color="#fbbf24"/><stop offset="1" stop-color="#34d399"/></linearGradient><linearGradient id="mark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#34d399"/><stop offset=".52" stop-color="#f97316"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
+  <rect width="760" height="220" rx="28" fill="#071b18"/>
+  <g transform="translate(42 54)"><circle cx="56" cy="56" r="48" fill="none" stroke="url(#mark)" stroke-width="8"/><path d="M27 74 49 42l14 20 26-36" fill="none" stroke="url(#mark)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="27" cy="74" r="5" fill="#34d399"/><circle cx="89" cy="26" r="5" fill="#f97316"/></g>
+  <text x="180" y="118" font-family="Inter,Arial,sans-serif" font-size="63" font-weight="700" letter-spacing="-2"><tspan fill="#34d399">Civicavita</tspan><tspan fill="#f97316">.A</tspan><tspan fill="#34d399">B</tspan></text>
+  <text x="184" y="153" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" fill="#9ca3af" letter-spacing="5">GLOBAL HEALTH</text>
+</svg>
