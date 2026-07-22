@@ -27,6 +27,8 @@ export default function AdminPanel() {
   const isBootstrapAdmin = user?.id === 'bootstrap-admin';
   const [setupMessage, setSetupMessage] = useState<string | null>(null);
   const [passwordChange, setPasswordChange] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [dbDiagnostic, setDbDiagnostic] = useState<any>(null);
+  const [diagnosingDb, setDiagnosingDb] = useState(false);
 
   // Merge adminExtra translations into admin for unified access (typed as any to allow extended keys)
   const _lang = useLanguage();
@@ -64,6 +66,19 @@ export default function AdminPanel() {
     const res = await fetch('/api/admin/database/initialize', { method: 'POST', credentials: 'same-origin' });
     const data = await res.json().catch(() => ({}));
     setSetupMessage(data.message || data.error || 'Setup failed');
+  };
+  const runDatabaseDiagnostic = async () => {
+    setDiagnosingDb(true); setDbDiagnostic(null);
+    try { const response = await fetch('/api/admin/database/diagnose', { credentials: 'same-origin' }); setDbDiagnostic(await response.json()); }
+    catch { setDbDiagnostic({ error: 'Could not contact the database diagnostic endpoint.' }); }
+    finally { setDiagnosingDb(false); }
+  };
+  const repairDatabase = async () => {
+    if (!confirm('Repair the posts database schema? Existing posts will not be deleted.')) return;
+    setDiagnosingDb(true);
+    try { const response = await fetch('/api/admin/database/repair', { method: 'POST', credentials: 'same-origin' }); const data = await response.json(); setDbDiagnostic(data); setSetupMessage(data.message || data.error || 'Repair complete'); }
+    catch { setSetupMessage('Could not run database repair.'); }
+    finally { setDiagnosingDb(false); }
   };
   const changeDatabasePassword = async () => {
     if (passwordChange.newPassword !== passwordChange.confirmPassword) return setSetupMessage('New passwords do not match.');
@@ -326,6 +341,7 @@ export default function AdminPanel() {
         {/* ═══════════ DASHBOARD TAB ═══════════ */}
         {tab === 'dashboard' && (
           <div className="space-y-6">
+            <div className="rounded-2xl glass p-6 border border-white/10"><div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-bold text-white">Database diagnostics</h3><p className="text-sm text-gray-400 mt-1">Checks the live D1 posts schema and available translations. No data is changed.</p></div><div className="flex gap-2"><button onClick={runDatabaseDiagnostic} disabled={diagnosingDb} className="px-4 py-2 rounded-xl bg-primary-500 text-white font-semibold disabled:opacity-50">{diagnosingDb ? 'Checking…' : 'Run D1 test'}</button><button onClick={repairDatabase} disabled={diagnosingDb} className="px-4 py-2 rounded-xl border border-amber-400/50 text-amber-200 font-semibold disabled:opacity-50">Repair database</button></div></div>{dbDiagnostic && <div className="mt-5 text-sm"><p className={dbDiagnostic.ok ? 'text-primary-300' : 'text-amber-300'}>{dbDiagnostic.ok ? 'Database schema is ready.' : (dbDiagnostic.error || 'Database needs repair or migrations.')}</p>{dbDiagnostic.postColumns?.length > 0 && <p className="text-gray-400 mt-2">Posts columns: {dbDiagnostic.postColumns.join(', ')}</p>}{dbDiagnostic.postCounts?.length > 0 && <p className="text-gray-400 mt-2">Posts by language: {dbDiagnostic.postCounts.map((r:any) => `${r.locale}: ${r.post_count}`).join(' · ')}</p>}{dbDiagnostic.checks?.length > 0 && <ul className="mt-3 space-y-1">{dbDiagnostic.checks.map((c:any) => <li key={c.name} className={c.ok ? 'text-gray-300' : 'text-red-300'}>{c.ok ? '✓' : '✕'} {c.name}: {c.detail}</li>)}</ul>}</div>}</div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {stats.map((s, i) => (
                 <div key={i} className="p-5 rounded-2xl glass">
